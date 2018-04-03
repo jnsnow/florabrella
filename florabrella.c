@@ -14,7 +14,8 @@ int switchPin = 10; // switch is connected to pin 10
 int buttonState;    // variable to hold the button state
 int lightMode = 0;  // how many times the button has been pressed
 
-uint32_t pcolor;    // Currently selected color
+uint8_t pColorRGB[3]; // Current color RGB
+uint32_t pcolor;      // Current color
 
 Adafruit_NeoPixel strip;
 Adafruit_NeoPixel pixel;
@@ -57,11 +58,22 @@ uint32_t wheel(byte wheelPos)
 }
 
 /** Set the chosen color to the one specified */
+void setColor(uint8_t r, uint8_t g, uint8_t b)
+{
+    pColorRGB[0] = r;
+    pColorRGB[1] = g;
+    pColorRGB[2] = b;
+    pcolor = strip.Color(r, g, b);
+    pixel.setPixelColor(0, pcolor);
+    pixel.show();
+}
+
 void setColor(uint32_t color)
 {
-  pcolor = color;
-  pixel.setPixelColor(0, color);
-  pixel.show();
+    uint8_t b = (color & 0xff);
+    uint8_t g = (color >> 8) & 0xff;
+    uint8_t r = (color >> 16) & 0xff;
+    setColor(r, g, b);
 }
 
 /** Invoke the sensor to read a color value */
@@ -71,7 +83,7 @@ uint32_t readColor() {
   // this sequence flashes the first pixel three times as a countdown to the color reading.
   for (i = 0; i < 3; i++) {
     //white, but dimmer-- 255 for all three values makes it blinding!
-    setColor(pixel.Color(188, 188, 188));
+    setColor(188, 188, 188);
     delay(1000);
     setColor(0);
     delay(500);
@@ -254,8 +266,8 @@ bool mode_void_rotate(void)
 }
 
 bool mode_detect(void) {
-  pcolor = readColor();
-  setColor(pcolor);
+  uint32_t c = readColor();
+  setColor(c);
   colorWipe(pcolor, 20);
 
   return true;
@@ -295,7 +307,7 @@ void setup() {
   // Set up the built-in pixel for the Flora
   pixel = Adafruit_NeoPixel(1, PIXEL_PIN, NEO_GRB + NEO_KHZ800);
   pixel.begin();
-  setColor(pixel.Color(0, 255, 0));
+  setColor(0, 255, 0);
 
   // Set up the button
   pinMode(switchPin, INPUT_PULLUP); // Set the switch pin as input
