@@ -11,8 +11,6 @@ const int nStrips = sizeof(geometry) / sizeof(geometry[0]);
 int stripAddrs[nStrips];
 
 int switchPin = 10; // switch is connected to pin 10
-int val;            // variable for reading the pin status
-int val2;
 int buttonState;    // variable to hold the button state
 int lightMode = 0;  // how many times the button has been pressed
 
@@ -341,6 +339,7 @@ void setup() {
 void loop() {
   static unsigned long t1;
   unsigned long t2;
+  int val;
 
   val = digitalRead(switchPin);
   if (val != buttonState && val == LOW) {
