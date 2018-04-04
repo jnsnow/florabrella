@@ -293,6 +293,89 @@ bool mode_void_rotate(void)
   return false;
 }
 
+/**
+ * sparkles: creates a number of sparkles that appear and fade out.
+ * @nSparkles: maximum number of concurrent sparkes
+ * @pSparkle:    Odds that a new sparkle will be created.
+ *               If p = 40 and frame rate is 20ms,
+ *               40 * 20ms --> 800ms;
+ *               A sparkle can be expected every 800ms.
+ * @sparkleLife: maximum life of a sparkle, in frames.
+ *               If the frame rate is 20, a sparkle life of 100 is 2000ms,
+ *               2 seconds.
+ */
+bool mode_sparkles(void) {
+    struct sparkle {
+        int8_t strand;
+        int8_t strandPos;
+        int16_t pos;
+        float brightness;
+        bool visible;
+        unsigned long tick;
+    };
+    /* Animation parameters */
+    static const int nSparkles = 4;
+    static const int pSparkle = 40;
+    static const int sparkleLife = 100;
+    /* state */
+    static struct sparkle spark[nSparkles];
+    static unsigned long tick;
+    int i, j, k;
+
+    /* Start with no color, and no brightness */
+    solidColor(0);
+    for (i = 0; i < strip.numPixels(); i++) {
+      lum[i] = 0.0;
+    }
+
+    /* Iterate over the sparkles */
+    for (i = 0; i < nSparkles; i++) {
+        if (spark[i].visible) {
+            int frame = tick - spark[i].tick;
+            float decay = ((exp(2 * ((float)frame / (float)sparkleLife)) - 1) / exp(2));
+            float ell = spark[i].brightness - decay;
+
+            /* Sparkle is extinguished: */
+            if (ell <= 0.0) {
+                ell = 0.0;
+                spark[i].visible = false;
+                continue;
+            }
+
+            /* For all pixels on this sparkle's strand, compute brightness; with k=0 as the epicenter: */
+            for (j = 0; j < geometry[spark[i].strand]; j++) {
+              float fade_lum;
+              k = abs(j - spark[i].strandPos);
+              fade_lum = ell / exp(k);
+              lum_adjust(loc2global(spark[i].strand, j), fade_lum);
+            }
+        } else if (random(pSparkle) == 0) {
+            /* Create a new sparkle: */
+            spark[i].visible = true;
+            spark[i].tick = tick;
+            /* Brightness is somewhere from 0.75 to 1.00 */
+            spark[i].brightness = 1.00 - (((float)random(100) / 100.0) * 0.25);
+            spark[i].strand = random(nStrips);
+            spark[i].strandPos = random(geometry[spark[i].strand]);
+            spark[i].pos = stripAddrs[spark[i].strand] + spark[i].strandPos;
+        }
+    }
+
+    /* With luminance values calculated, apply color: */
+    for (i = 0; i < strip.numPixels(); i++) {
+      uint8_t r, g, b;
+
+      r = lum[i] * pColorRGB[0];
+      g = lum[i] * pColorRGB[1];
+      b = lum[i] * pColorRGB[2];
+
+      strip.setPixelColor(i, r, g, b);
+    }
+
+    tick += 1;
+    return false;
+}
+
 bool mode_detect(void) {
   uint32_t c = readColor();
   setColor(c);
@@ -310,6 +393,7 @@ enum lightMode {
   MODE_BLINK,
   MODE_ROTATE,
   MODE_VOID_ROTATE,
+  MODE_SPARKLES,
   MODE_DETECT,
   /* Insert new modes here */
   MODE__MAX
@@ -323,6 +407,7 @@ lightFn modeDispatch[MODE__MAX] = {
   [MODE_BLINK]         = mode_blink,
   [MODE_ROTATE]        = mode_rotate,
   [MODE_VOID_ROTATE]   = mode_void_rotate,
+  [MODE_SPARKLES]      = mode_sparkles,
   [MODE_DETECT]        = mode_detect
 };
 
