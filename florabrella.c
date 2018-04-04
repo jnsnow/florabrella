@@ -2,17 +2,27 @@
 #include "Adafruit_TCS34725.h"
 #include <Adafruit_NeoPixel.h>
 
-#define PIXEL_PIN 8
 
-/* Layout of pixels */
+/** Configuration **/
+
+/* Flora v2 neopixel data pin */
+const int pixel_pin = 8;
+
+/* Neopixel strip layout */
 const int strip_pin = 6;
-int geometry[] = {18, 18, 19, 19, 19, 19, 19, 19};
+const int geometry[] = {18, 18, 19, 19, 19, 19, 19, 19};
+
+/* Pushbutton Switch */
+const int switchPin = 10;
+
+
+/** Global State **/
+
 const int nStrips = sizeof(geometry) / sizeof(geometry[0]);
 int stripAddrs[nStrips];
 
-int switchPin = 10; // switch is connected to pin 10
 int buttonState;    // variable to hold the button state
-int lightMode = 0;  // how many times the button has been pressed
+int lightMode;      // how many times the button has been pressed
 
 uint8_t pColorRGB[3]; // Current color RGB
 uint32_t pcolor;      // Current color
@@ -21,6 +31,7 @@ Adafruit_NeoPixel strip;
 Adafruit_NeoPixel pixel;
 Adafruit_TCS34725 tcs;
 byte gammatable[256];
+
 
 /** Helper Functions **/
 
@@ -305,7 +316,7 @@ void setup() {
   Serial.begin(9600);
 
   // Set up the built-in pixel for the Flora
-  pixel = Adafruit_NeoPixel(1, PIXEL_PIN, NEO_GRB + NEO_KHZ800);
+  pixel = Adafruit_NeoPixel(1, pixel_pin, NEO_GRB + NEO_KHZ800);
   pixel.begin();
   setColor(0, 255, 0);
 
