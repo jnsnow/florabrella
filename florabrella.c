@@ -16,6 +16,9 @@ const int nPixels = 150;
 /* Pushbutton Switch */
 const int switchPin = 10;
 
+/* Brightness */
+const uint8_t brightness = 255;
+
 
 /** Global State **/
 
@@ -433,7 +436,9 @@ void setup() {
   }
   pinMode(strip_pin, OUTPUT);
   strip = Adafruit_NeoPixel(j, strip_pin, NEO_GRB + NEO_KHZ800);
-  strip.setBrightness(80); //adjust brightness here
+  if (brightness != 255) {
+    strip.setBrightness(brightness);
+  }
   strip.begin();
   strip.show(); // Initialize all pixels to 'off'
 
