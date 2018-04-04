@@ -140,6 +140,12 @@ void lum_adjust(int16_t addr, float amt)
   }
 }
 
+/* Given a strip and a local address, get the global address */
+int16_t loc2global(int8_t strip, int8_t loc)
+{
+  return stripAddrs[strip] + loc;
+}
+
 /** Light Mode Functions **/
 
 typedef bool (*lightFn)(void);
