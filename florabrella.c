@@ -11,6 +11,7 @@ const int pixel_pin = 8;
 /* Neopixel strip layout */
 const int strip_pin = 6;
 const int geometry[] = {18, 18, 19, 19, 19, 19, 19, 19};
+const int nPixels = 150;
 
 /* Pushbutton Switch */
 const int switchPin = 10;
@@ -21,6 +22,7 @@ const int switchPin = 10;
 const int nStrips = sizeof(geometry) / sizeof(geometry[0]);
 int stripAddrs[nStrips];
 
+float lum[nPixels]; // Luminance map for pixel strip
 int buttonState;    // variable to hold the button state
 int lightMode;      // how many times the button has been pressed
 
@@ -128,6 +130,15 @@ uint32_t readColor() {
   return strip.Color(gammatable[(int)r], gammatable[(int)g], gammatable[(int)b]);
 }
 
+void lum_adjust(int16_t addr, float amt)
+{
+  lum[addr] += amt;
+  if (lum[addr] > 1.00) {
+    lum[addr] = 1.00;
+  } else if (lum[addr] < 0.0) {
+    lum[addr] = 0.0;
+  }
+}
 
 /** Light Mode Functions **/
 
