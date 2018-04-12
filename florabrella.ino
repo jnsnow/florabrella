@@ -19,6 +19,12 @@ const int switchPin = 10;
 /* Brightness */
 const uint8_t brightness = 255;
 
+/* Framerate (in milliseconds):
+ * advisory as a maximum framerate; i.e. frames will never render FASTER than
+ * this rate. Animations may use this for converting anticipated durations into
+ * some number of arbitrary animation frames. */
+const uint16_t framerate = 20;
+
 
 /** Global State **/
 
@@ -469,6 +475,8 @@ void setup() {
 void loop() {
   static unsigned long t1;
   unsigned long t2;
+  unsigned long dx;
+
   int val;
 
   val = digitalRead(switchPin);
@@ -482,5 +490,11 @@ void loop() {
   }
 
   strip.show();
-  delay(20);
+
+  t2 = millis();
+  dx = t2 - t1;
+  t1 = t2;
+  if (dx < framerate) {
+      delay(framerate - dx);
+  }
 }
