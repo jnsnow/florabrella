@@ -155,6 +155,27 @@ int16_t loc2global(int8_t strip, int8_t loc)
   return stripAddrs[strip] + loc;
 }
 
+/* Given the luminance map, apply the static, color color
+ * to all the pixels in the strip. */
+void renderFromLuminance(void)
+{
+    int16_t i;
+
+    for (i = 0; i < strip.numPixels(); i++) {
+      uint8_t r, g, b;
+
+      r = lum[i] * pColorRGB[0];
+      g = lum[i] * pColorRGB[1];
+      b = lum[i] * pColorRGB[2];
+
+      r = gammatable[r];
+      g = gammatable[g];
+      b = gammatable[b];
+
+      strip.setPixelColor(i, r, g, b);
+    }
+}
+
 /** Light Mode Functions **/
 
 typedef bool (*lightFn)(void);
@@ -370,17 +391,7 @@ bool mode_sparkles(void) {
         }
     }
 
-    /* With luminance values calculated, apply color: */
-    for (i = 0; i < strip.numPixels(); i++) {
-      uint8_t r, g, b;
-
-      r = lum[i] * pColorRGB[0];
-      g = lum[i] * pColorRGB[1];
-      b = lum[i] * pColorRGB[2];
-
-      strip.setPixelColor(i, r, g, b);
-    }
-
+    renderFromLuminance();
     tick += 1;
     return false;
 }
