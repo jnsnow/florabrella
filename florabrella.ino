@@ -382,10 +382,6 @@ bool mode_sparkles(void) {
 bool mode_detect(void) {
   uint32_t c = readColor();
   setColor(c);
-  /* FIXME DEBUG TMP -- always use yellow */
-  if (1) {
-    setColor(255, 255, 0);
-  }
   colorWipe(pcolor, 20);
 
   return true;
