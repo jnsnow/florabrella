@@ -396,6 +396,34 @@ bool mode_sparkles(void) {
     return false;
 }
 
+bool mode_paparazzi(void)
+{
+    /* time in ms for a light to fade to 1% */
+    static uint16_t life = 1000;
+    static uint16_t lifeFrames = life / framerate;
+    static float decay = pow(100.0, 1.0 / (float)lifeFrames);
+    static float decayCoefficient = 1.0 / decay;
+
+    int16_t i;
+    int16_t addr = random(strip.numPixels);
+
+    /* Buzzap! */
+    lum[addr] = 1.00;
+
+    /* Decay remaining sparks */
+    for (i = 0; i < strip.numPixels; i++) {
+        if (lum[i]) {
+            lum[i] = lum[i] * decayCoefficient;
+            if (lum[i] <= 0.01) {
+                lum[i] = 0.00;
+            }
+        }
+    }
+
+    renderFromLuminance();
+    return false;
+}
+
 bool mode_detect(void) {
   uint32_t c = readColor();
   setColor(c);
@@ -414,6 +442,7 @@ enum lightMode {
   MODE_ROTATE,
   MODE_VOID_ROTATE,
   MODE_SPARKLES,
+  MODE_PAPARAZZI,
   MODE_DETECT,
   /* Insert new modes here */
   MODE__MAX
@@ -428,6 +457,7 @@ lightFn modeDispatch[MODE__MAX] = {
   [MODE_ROTATE]        = mode_rotate,
   [MODE_VOID_ROTATE]   = mode_void_rotate,
   [MODE_SPARKLES]      = mode_sparkles,
+  [MODE_PAPARAZZI]     = mode_paparazzi,
   [MODE_DETECT]        = mode_detect
 };
 
