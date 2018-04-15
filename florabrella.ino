@@ -405,13 +405,13 @@ bool mode_paparazzi(void)
     static float decayCoefficient = 1.0 / decay;
 
     int16_t i;
-    int16_t addr = random(strip.numPixels);
+    int16_t addr = random(strip.numPixels());
 
     /* Buzzap! */
     lum[addr] = 1.00;
 
     /* Decay remaining sparks */
-    for (i = 0; i < strip.numPixels; i++) {
+    for (i = 0; i < strip.numPixels(); i++) {
         if (lum[i]) {
             lum[i] = lum[i] * decayCoefficient;
             if (lum[i] <= 0.01) {
