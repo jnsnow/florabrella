@@ -530,15 +530,41 @@ void setup() {
 
 void loop() {
   static unsigned long t1;
+  static unsigned long b1; /* Time when button was last lifted */
+  static bool picker;
   unsigned long t2;
   unsigned long dx;
-
+  unsigned long b2; /* Time when button was last pressed */
   int val;
 
   val = digitalRead(switchPin);
-  if (val != buttonState && val == LOW) {
-    lightMode = (lightMode + 1) % MODE__MAX;
+
+  if (val == HIGH) {
+      /* Button is being pressed */
+      b2 = millis();
+  } else {
+      b1 = b2;
   }
+
+  /* Sustained Hold */
+  if (val == buttonState && val == HIGH) {
+      dx = b2 - b1;
+      /* Button has been held for 3+ seconds */
+      if (dx > 3000) {
+          picker = true;
+          color_chooser();
+      }
+  }
+
+  if (val != buttonState && val == LOW) {
+      /* Button was pressed and is now lifted */
+      if (!picker) {
+          lightMode = (lightMode + 1) % MODE__MAX;
+      } else {
+          picker = false;
+      }
+  }
+
   buttonState = val;
 
   if (modeDispatch[lightMode]()) {
