@@ -139,6 +139,21 @@ uint32_t readColor() {
   return strip.Color(gammatable[(int)r], gammatable[(int)g], gammatable[(int)b]);
 }
 
+/**
+ * Animation FN:
+ * Rotate the color on the on-board pixel, setting the color each time.
+ */
+void color_chooser(void)
+{
+  static uint8_t frame = 0;
+  uint16_t i;
+  uint32_t c;
+
+  c = wheel(frame % 256);
+  frame = (frame + 1) % 256;
+  setColor(c);
+}
+
 void lum_adjust(int16_t addr, float amt)
 {
   lum[addr] += amt;
